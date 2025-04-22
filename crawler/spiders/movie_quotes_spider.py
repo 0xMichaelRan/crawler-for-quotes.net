@@ -14,7 +14,10 @@ from items import MovieItem, QuoteItem
 class MovieQuotesSpider(scrapy.Spider):
     name = "movie_quotes"
     allowed_domains = ["quotes.net"]
-    start_urls = ["https://www.quotes.net/allmovies/A"]
+    start_urls = [
+        "https://www.quotes.net/allmovies/C", 
+        "https://www.quotes.net/allmovies/D", 
+        "https://www.quotes.net/allmovies/E"]
     
     # Custom settings for this spider
     custom_settings = {
