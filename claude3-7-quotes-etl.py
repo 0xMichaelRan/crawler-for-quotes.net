@@ -10,12 +10,11 @@ def create_schema_and_tables(conn):
     """Create the necessary schema and tables if they don't exist."""
     with conn.cursor() as cur:
         # Create schema
-        cur.execute("CREATE SCHEMA IF NOT EXISTS quotes;")
+        cur.execute("CREATE SCHEMA IF NOT EXISTS quotesnet;")
         
         # Create movies table with additional columns for year and movie_id
         cur.execute("""
-        DROP TABLE quotes.movies CASCADE;
-        CREATE TABLE quotes.movies (
+        CREATE TABLE quotesnet.movies (
             id SERIAL PRIMARY KEY,
             title TEXT NOT NULL,
             year INTEGER,
@@ -27,19 +26,19 @@ def create_schema_and_tables(conn):
         
         # Create quotes table with foreign key reference to movies
         cur.execute("""
-        CREATE TABLE IF NOT EXISTS quotes.quotes (
+        CREATE TABLE IF NOT EXISTS quotesnet.quotes (
             id SERIAL PRIMARY KEY,
-            movie_id INTEGER REFERENCES quotes.movies(id),
+            movie_id INTEGER REFERENCES quotesnet.movies(id),
             quote_text TEXT NOT NULL,
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         );
         """)
         
         # Create indexes for better performance
-        cur.execute("CREATE INDEX IF NOT EXISTS idx_movie_title ON quotes.movies(title);")
-        cur.execute("CREATE INDEX IF NOT EXISTS idx_movie_year ON quotes.movies(year);")
-        cur.execute("CREATE INDEX IF NOT EXISTS idx_movie_movie_id ON quotes.movies(movie_id);")
-        cur.execute("CREATE INDEX IF NOT EXISTS idx_quote_movie_id ON quotes.quotes(movie_id);")
+        cur.execute("CREATE INDEX IF NOT EXISTS idx_movie_title ON quotesnet.movies(title);")
+        cur.execute("CREATE INDEX IF NOT EXISTS idx_movie_year ON quotesnet.movies(year);")
+        cur.execute("CREATE INDEX IF NOT EXISTS idx_movie_movie_id ON quotesnet.movies(movie_id);")
+        cur.execute("CREATE INDEX IF NOT EXISTS idx_quote_movie_id ON quotesnet.quotes(movie_id);")
         
         conn.commit()
 
@@ -94,7 +93,7 @@ def process_json_files(conn, json_dir_path):
                     
                     # Insert or get movie ID
                     cur.execute(
-                        "SELECT id FROM quotes.movies WHERE title = %s AND (year = %s OR year IS NULL) AND (movie_id = %s OR movie_id IS NULL)",
+                        "SELECT id FROM quotesnet.movies WHERE title = %s AND (year = %s OR year IS NULL) AND (movie_id = %s OR movie_id IS NULL)",
                         (title, year, movie_id)
                     )
                     result = cur.fetchone()
@@ -104,7 +103,7 @@ def process_json_files(conn, json_dir_path):
                         print(f"Movie '{title}' already exists with ID {db_movie_id}")
                     else:
                         cur.execute(
-                            "INSERT INTO quotes.movies (title, year, movie_id, url) VALUES (%s, %s, %s, %s) RETURNING id",
+                            "INSERT INTO quotesnet.movies (title, year, movie_id, url) VALUES (%s, %s, %s, %s) RETURNING id",
                             (title, year, movie_id, url)
                         )
                         db_movie_id = cur.fetchone()[0]
@@ -117,7 +116,7 @@ def process_json_files(conn, json_dir_path):
                         if quote_values:
                             execute_values(
                                 cur,
-                                "INSERT INTO quotes.quotes (movie_id, quote_text) VALUES %s",
+                                "INSERT INTO quotesnet.quotes (movie_id, quote_text) VALUES %s",
                                 quote_values
                             )
                             print(f"Inserted {len(quote_values)} quotes for movie '{title}'")
@@ -136,10 +135,10 @@ def display_info(conn):
     """Display information about the database tables."""
     with conn.cursor() as cur:
         # Get total counts
-        cur.execute("SELECT COUNT(*) FROM quotes.movies")
+        cur.execute("SELECT COUNT(*) FROM quotesnet.movies")
         total_movies = cur.fetchone()[0]
         
-        cur.execute("SELECT COUNT(*) FROM quotes.quotes")
+        cur.execute("SELECT COUNT(*) FROM quotesnet.quotes")
         total_quotes = cur.fetchone()[0]
         
         print("\n=== Database Information ===")
@@ -151,7 +150,7 @@ def display_info(conn):
         SELECT 
             UPPER(LEFT(title, 1)) AS first_letter,
             COUNT(*) AS count
-        FROM quotes.movies
+        FROM quotesnet.movies
         GROUP BY first_letter
         ORDER BY first_letter
         """)
@@ -166,7 +165,7 @@ def display_info(conn):
         cur.execute("""
         SELECT AVG(quote_count) FROM (
             SELECT movie_id, COUNT(*) as quote_count
-            FROM quotes.quotes
+            FROM quotesnet.quotes
             GROUP BY movie_id
         ) AS subquery
         """)
@@ -187,7 +186,7 @@ def main():
     }
     
     # Directory containing JSON files - replace with your actual path
-    json_dir_path = './crawler/results/'
+    json_dir_path = './crawler/results/test'
     
     try:
         # Connect to the database
