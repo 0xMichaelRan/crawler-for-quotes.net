@@ -15,7 +15,7 @@ class MovieQuotesSpider(scrapy.Spider):
     name = "movie_quotes"
     allowed_domains = ["quotes.net"]
     start_urls = [
-        "https://www.quotes.net/allmovies/S"
+        "https://www.quotes.net/allmovies/A"
         ]
     
     # Custom settings for this spider
