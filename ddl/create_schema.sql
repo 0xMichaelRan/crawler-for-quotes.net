@@ -1,7 +1,5 @@
 -- quotesnet.movies definition
 
--- Drop table
-
 -- DROP TABLE quotesnet.movies;
 
 CREATE TABLE quotesnet.movies (
@@ -18,13 +16,11 @@ CREATE INDEX idx_movie_title ON quotes.movies USING btree (title);
 CREATE INDEX idx_movie_year ON quotes.movies USING btree (year);
 
 
--- quotesnet."quotes" definition
+-- quotesnet.quotes definition
 
--- Drop table
+-- DROP TABLE quotesnet.quotes;
 
--- DROP TABLE quotesnet."quotes";
-
-CREATE TABLE quotesnet."quotes" (
+CREATE TABLE quotesnet.quotes (
 	id serial4 NOT NULL,
 	movie_id int4 NULL,
 	quote_text text NOT NULL,
